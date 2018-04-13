@@ -4,6 +4,8 @@ import re
 from scrapy.http import Request
 from urllib import parse
 
+from ArticleSpider.items import JoBoleArticleItem
+
 
 class JobbleSpider(scrapy.Spider):
     name = 'jobble'
@@ -19,9 +21,10 @@ class JobbleSpider(scrapy.Spider):
         # 提取下一页，交给scrapy下载
         next_urls = response.xpath('//a[@class="next page-numbers"]/@href').extract_first()
         if next_urls:
-            yield Request(url=parse.urljoin(response.url, post_url), callback=self.parse)
+            yield Request(url=parse.urljoin(response.url, next_urls), callback=self.parse)
     
     def parse_detail(self, response):
+        article_item = JoBoleArticleItem()
         # 提取文章的具体字段
         title = response.xpath('//div[@class="entry-header"]/h1/text()').extract_first()
         create_date = response.xpath('//p[@class="entry-meta-hide-on-mobile"]/text()').extract_first().strip().replace(
@@ -43,5 +46,9 @@ class JobbleSpider(scrapy.Spider):
         
         tag_list = response.xpath("//p[@class='entry-meta-hide-on-mobile']/a/text()").extract()
         tag_list = [tag for tag in tag_list if not tag.strip().endswith('评论')]
-        tag = '，'.join(tag_list)
+        tag = ','.join(tag_list)
+        article_item["title"] = title
+        article_item["url"] = response.url
+        
+        
         pass
