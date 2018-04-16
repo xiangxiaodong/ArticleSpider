@@ -3,8 +3,8 @@ import scrapy
 import re
 from scrapy.http import Request
 from urllib import parse
-
-from ArticleSpider.items import JoBoleArticleItem
+from ArticleSpider.utils import common
+from ArticleSpider.items import JobBoleArticleItem
 
 
 class JobbleSpider(scrapy.Spider):
@@ -14,9 +14,12 @@ class JobbleSpider(scrapy.Spider):
     
     def parse(self, response):
         # 解析列表页面中的所有文章url并且交给scrapy下载后并进行解析
-        post_urls = response.xpath('//div[@id="archive"]/div[@class="post floated-thumb"]/div[@class="post-thumb"]/a/@href').extract()
-        for post_url in post_urls:
-            yield Request(url=parse.urljoin(response.url, post_url), callback=self.parse_detail)
+        post_nodes = response.xpath('//div[@id="archive"]/div[@class="post floated-thumb"]/div[@class="post-thumb"]/a')
+        for post_node in post_nodes:
+            image_url = post_node.xpath('./img/@src').extract_first()
+            post_url = post_node.xpath('./@href').extract_first()
+            yield Request(url=parse.urljoin(response.url, post_url), meta={"front_image_url": image_url},
+                          callback=self.parse_detail)
         
         # 提取下一页，交给scrapy下载
         next_urls = response.xpath('//a[@class="next page-numbers"]/@href').extract_first()
@@ -24,12 +27,13 @@ class JobbleSpider(scrapy.Spider):
             yield Request(url=parse.urljoin(response.url, next_urls), callback=self.parse)
     
     def parse_detail(self, response):
-        article_item = JoBoleArticleItem()
+        front_image_url = response.meta['front_image_urls', '']
+        article_item = JobBoleArticleItem()
         # 提取文章的具体字段
         title = response.xpath('//div[@class="entry-header"]/h1/text()').extract_first()
         create_date = response.xpath('//p[@class="entry-meta-hide-on-mobile"]/text()').extract_first().strip().replace(
             '·', '').strip()
-        praise_num = response.xpath("//span[contains(@class,'vote-post-up')]/h10/text()").extract_first()
+        praise_nums = response.xpath("//span[contains(@class,'vote-post-up')]/h10/text()").extract_first()
         fav_nums = response.xpath("//span[contains(@class,'bookmark-btn')]/text()").extract_first()
         match_re = re.match(".*?(\d+).*", fav_nums)
         if match_re:
@@ -46,9 +50,14 @@ class JobbleSpider(scrapy.Spider):
         
         tag_list = response.xpath("//p[@class='entry-meta-hide-on-mobile']/a/text()").extract()
         tag_list = [tag for tag in tag_list if not tag.strip().endswith('评论')]
-        tag = ','.join(tag_list)
+        tags = ','.join(tag_list)
+        article_item['url_object_id'] = get_md5(response.url)
         article_item["title"] = title
         article_item["url"] = response.url
-        
-        
-        pass
+        article_item["create_date"] = create_date
+        article_item["front_image_url"] = [front_image_url]
+        article_item["praise_nums"] = praise_nums
+        article_item["tags"] = tags
+        article_item["fav_nums"] = fav_nums
+        article_item["content"] = content
+        yield article_item

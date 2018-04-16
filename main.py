@@ -1,4 +1,3 @@
-__author__ = 'bobby'
 
 from scrapy.cmdline import execute
 
