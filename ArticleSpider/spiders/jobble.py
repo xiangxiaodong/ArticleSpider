@@ -4,7 +4,7 @@ import re
 from scrapy.http import Request
 from urllib import parse
 
-from ArticleSpider.items import JoBoleArticleItem
+# from ArticleSpider.items import JoBoleArticleItem
 
 
 class JobbleSpider(scrapy.Spider):
@@ -24,12 +24,12 @@ class JobbleSpider(scrapy.Spider):
             yield Request(url=parse.urljoin(response.url, next_urls), callback=self.parse)
     
     def parse_detail(self, response):
-        article_item = JoBoleArticleItem()
+        # article_item = JoBoleArticleItem()
         # 提取文章的具体字段
         title = response.xpath('//div[@class="entry-header"]/h1/text()').extract_first()
         create_date = response.xpath('//p[@class="entry-meta-hide-on-mobile"]/text()').extract_first().strip().replace(
             '·', '').strip()
-        praise_num = response.xpath("//span[contains(@class,'vote-post-up')]/h10/text()").extract_first()
+        praise_nums = response.xpath("//span[contains(@class,'vote-post-up')]/h10/text()").extract_first()
         fav_nums = response.xpath("//span[contains(@class,'bookmark-btn')]/text()").extract_first()
         match_re = re.match(".*?(\d+).*", fav_nums)
         if match_re:
@@ -46,9 +46,7 @@ class JobbleSpider(scrapy.Spider):
         
         tag_list = response.xpath("//p[@class='entry-meta-hide-on-mobile']/a/text()").extract()
         tag_list = [tag for tag in tag_list if not tag.strip().endswith('评论')]
-        tag = ','.join(tag_list)
-        article_item["title"] = title
-        article_item["url"] = response.url
+        tags = ','.join(tag_list)
+        # article_item["title"] = title
+        # article_item["url"] = response.url
         
-        
-        pass
