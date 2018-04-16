@@ -6,11 +6,27 @@
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 from scrapy.pipelines.images import ImagesPipeline
+import codecs
+import json
 
 class ArticlespiderPipeline(object):
     def process_item(self, item, spider):
         return item
-    
+
+#写入json文件
+class JsonWithEncodeingPipeline(object):
+    def __init__(self):
+        self.file = codecs.open('article.json', 'w', encoding='utf-8')
+    def process_item(self,item,spider):
+        lines = json.dumps(dict(item),ensure_ascii=False) + '\n'
+        self.file.write(lines)
+        return item
+    def spider_closed(self,spider):
+        self.file.close()
+        
+        
+
+
 class ArticleImagePipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
         for ok, value in results:
@@ -18,4 +34,3 @@ class ArticleImagePipeline(ImagesPipeline):
         item['front_image_path'] = image_file_path
         
         return item
-
