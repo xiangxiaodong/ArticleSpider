@@ -65,7 +65,7 @@ class MysqlPipeline(object):
             'localhost',
             'root',
             'root',
-            'xiangxiaodong_blog',
+            'article',
             charset='utf8',
             use_unicode=True,
         )
@@ -73,11 +73,11 @@ class MysqlPipeline(object):
     
     def process_item(self, item, spider):
         insert_sql = """
-        insert into blog_post(title,body,created_time)
-        VALUES (%s,%s,%s)
+        insert into jobbole_article(title,url,create_date,fav_nums)
+        VALUES (%s,%s,%s,%s)
         """
         self.cursor.execute(insert_sql,
-                            (item['title'], item['content'],
-                             item['create_date'])
+                            (item['title'], item['url'],
+                             item['create_date'],item['fav_nums'])
                             )
         self.conn.commit()
