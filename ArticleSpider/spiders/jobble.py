@@ -3,9 +3,9 @@ import scrapy
 import re
 from scrapy.http import Request
 from urllib import parse
-from ArticleSpider.utils import common
+from ArticleSpider.utils.common import get_md5
 from ArticleSpider.items import JobBoleArticleItem
-
+import datetime
 
 class JobbleSpider(scrapy.Spider):
     name = 'jobble'
@@ -27,8 +27,8 @@ class JobbleSpider(scrapy.Spider):
             yield Request(url=parse.urljoin(response.url, next_urls), callback=self.parse)
     
     def parse_detail(self, response):
-        front_image_url = response.meta['front_image_urls', '']
         article_item = JobBoleArticleItem()
+        front_image_url = response.meta.get('front_image_url', '')  # 文章封面图的url
         # 提取文章的具体字段
         title = response.xpath('//div[@class="entry-header"]/h1/text()').extract_first()
         create_date = response.xpath('//p[@class="entry-meta-hide-on-mobile"]/text()').extract_first().strip().replace(
@@ -46,7 +46,8 @@ class JobbleSpider(scrapy.Spider):
             comment_nums = int(match_re.group(1))
         else:
             comment_nums = 0
-        content = response.xpath("//div[@class='entry']").extract_first()
+        content = response.xpath("//div[@class='entry']/p/text()").extract()
+        content = ''.join(content)
         
         tag_list = response.xpath("//p[@class='entry-meta-hide-on-mobile']/a/text()").extract()
         tag_list = [tag for tag in tag_list if not tag.strip().endswith('评论')]
@@ -54,6 +55,10 @@ class JobbleSpider(scrapy.Spider):
         article_item['url_object_id'] = get_md5(response.url)
         article_item["title"] = title
         article_item["url"] = response.url
+        try:
+            create_date = datetime.datetime.strptime(create_date,'%Y/%m/%d').date()
+        except Exception as e:
+            create_date = datetime.datetime.now().date()
         article_item["create_date"] = create_date
         article_item["front_image_url"] = [front_image_url]
         article_item["praise_nums"] = praise_nums

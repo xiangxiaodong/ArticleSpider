@@ -66,19 +66,21 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # 'ArticleSpider.pipelines.ArticlespiderPipeline': 300,
-    'ArticleSpider.pipelines.JsonWithEncodeingPipeline': 300,
-
-    'scrapy.pipelines.images.ImagesPipeline': 1,
+    # 'ArticleSpider.pipelines.JsonWithEncodeingPipeline': 2,
+    # 'ArticleSpider.pipelines.JsonExportPipeline': 3,
+    # 'ArticleSpider.pipelines.ArticleImagePipeline': 1,
+    'ArticleSpider.pipelines.MysqlPipeline': 4,
+    #ArticleImagePipeline
+    # 'scrapy.pipelines.images.ImagesPipeline': 1,#数字越小越优先
 }
 
-IMAGES_URLS_FIELD = "front_image_url"
+IMAGES_URLS_FIELD = "front_image_url"#告诉在item中取哪个字段
 
 project_dir = os.path.abspath(os.path.dirname(__file__))  # 获取当前文件夹的绝对路径
 IMAGES_STORE = os.path.join(project_dir, 'images')
-#
-# IMAGES_MIN_HEIGHT = 100
-# IMAGES_MIN_WIDTH = 100
+
+# IMAGES_MIN_HEIGHT = 100  #过滤图片大小
+# IMAGES_MIN_WIDTH = 100   #过滤图片大小
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
