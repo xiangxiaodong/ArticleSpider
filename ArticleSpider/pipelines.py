@@ -10,6 +10,8 @@ import codecs
 import json
 from scrapy.exporters import JsonItemExporter
 import MySQLdb
+from twisted.enterprise import adbapi
+import MySQLdb.cursors
 
 
 class ArticlespiderPipeline(object):
@@ -59,6 +61,8 @@ class ArticleImagePipeline(ImagesPipeline):
 
 
 # 保存到mysql数据库
+# 同步化存储，适合插入数据量不多的时候使用
+# 爬取的数据一多，插入的速度跟不上爬取的速度，容易引起堵塞
 class MysqlPipeline(object):
     def __init__(self):
         self.conn = MySQLdb.connect(
@@ -78,6 +82,47 @@ class MysqlPipeline(object):
         """
         self.cursor.execute(insert_sql,
                             (item['title'], item['url'],
-                             item['create_date'],item['fav_nums'])
+                             item['create_date'], item['fav_nums'])
                             )
         self.conn.commit()
+
+
+# 异步操作
+class MysqlTwistedPipeline(object):
+    def __init__(self, dbpool):
+        self.dbpool = dbpool
+    
+    @classmethod
+    def from_settings(cls, settings):
+        dbparms = dict(
+            host=settings['MYSQL_HOST'],
+            db=settings['MYSQL_DBNAME'],
+            user=settings['MYSQL_USER'],
+            passwd=settings['MYSQL_PASSWORD'],
+            charset='utf8',
+            cursorclass=MySQLdb.cursors.DictCursor,
+            use_unicode=True,
+        )
+        dbpool = adbapi.ConnectionPool('MySQLdb', **dbparms)
+        
+        return cls(dbpool)
+    
+    def process_item(self, item, spider):
+        # 使用twisted将mysql插入变成异步执行
+        query = self.dbpool.runInteraction(self.do_insert, item)
+        query.addErrback(self.handle_error)  # 处理异常
+    
+    def handle_error(self, failure):
+        # 处理异步插入的异常
+        print(failure)
+    
+    def do_insert(self, cursor, item):
+        # 执行具体的插入
+        insert_sql = """
+                insert into jobbole_article(title,url,create_date,fav_nums)
+                VALUES (%s,%s,%s,%s)
+                """
+        cursor.execute(insert_sql,
+                       (item['title'], item['url'],
+                        item['create_date'], item['fav_nums'])
+                       )

@@ -69,12 +69,14 @@ ITEM_PIPELINES = {
     # 'ArticleSpider.pipelines.JsonWithEncodeingPipeline': 2,
     # 'ArticleSpider.pipelines.JsonExportPipeline': 3,
     # 'ArticleSpider.pipelines.ArticleImagePipeline': 1,
-    'ArticleSpider.pipelines.MysqlPipeline': 4,
-    #ArticleImagePipeline
+    # 'ArticleSpider.pipelines.MysqlPipeline': 4,
+    'ArticleSpider.pipelines.MysqlTwistedPipeline': 2,
+    
+    # ArticleImagePipeline
     # 'scrapy.pipelines.images.ImagesPipeline': 1,#数字越小越优先
 }
 
-IMAGES_URLS_FIELD = "front_image_url"#告诉在item中取哪个字段
+IMAGES_URLS_FIELD = "front_image_url"  # 告诉在item中取哪个字段
 
 project_dir = os.path.abspath(os.path.dirname(__file__))  # 获取当前文件夹的绝对路径
 IMAGES_STORE = os.path.join(project_dir, 'images')
@@ -102,3 +104,10 @@ IMAGES_STORE = os.path.join(project_dir, 'images')
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# 可以将数据库的链接写在setting文件中
+# 没有配置port，采用默认端口
+MYSQL_HOST = 'localhost'
+MYSQL_DBNAME = 'article'
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = 'root'
