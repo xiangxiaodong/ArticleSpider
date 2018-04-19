@@ -3,10 +3,16 @@ import scrapy
 import re
 from scrapy.http import Request
 from urllib import parse
+<<<<<<< HEAD
 from ArticleSpider.utils.common import get_md5
 from ArticleSpider.items import JobBoleArticleItem,ArticleItemLoader
 import datetime
 from scrapy.loader import ItemLoader
+=======
+
+# from ArticleSpider.items import JoBoleArticleItem
+
+>>>>>>> master
 
 class JobbleSpider(scrapy.Spider):
     name = 'jobble'
@@ -28,6 +34,7 @@ class JobbleSpider(scrapy.Spider):
             yield Request(url=parse.urljoin(response.url, next_urls), callback=self.parse)
     
     def parse_detail(self, response):
+<<<<<<< HEAD
         # article_item = JobBoleArticleItem()
         front_image_url = response.meta.get('front_image_url', '')  # 文章封面图的url
         # # 提取文章的具体字段
@@ -83,3 +90,31 @@ class JobbleSpider(scrapy.Spider):
         
         
         yield article_item
+=======
+        # article_item = JoBoleArticleItem()
+        # 提取文章的具体字段
+        title = response.xpath('//div[@class="entry-header"]/h1/text()').extract_first()
+        create_date = response.xpath('//p[@class="entry-meta-hide-on-mobile"]/text()').extract_first().strip().replace(
+            '·', '').strip()
+        praise_nums = response.xpath("//span[contains(@class,'vote-post-up')]/h10/text()").extract_first()
+        fav_nums = response.xpath("//span[contains(@class,'bookmark-btn')]/text()").extract_first()
+        match_re = re.match(".*?(\d+).*", fav_nums)
+        if match_re:
+            fav_nums = int(match_re.group(1))
+        else:
+            fav_nums = 0
+        comment_nums = response.xpath("//a[@href='#article-comment']/text()").extract_first()
+        match_re = re.match(".*?(\d+).*", comment_nums)
+        if match_re:
+            comment_nums = int(match_re.group(1))
+        else:
+            comment_nums = 0
+        content = response.xpath("//div[@class='entry']").extract_first()
+        
+        tag_list = response.xpath("//p[@class='entry-meta-hide-on-mobile']/a/text()").extract()
+        tag_list = [tag for tag in tag_list if not tag.strip().endswith('评论')]
+        tags = ','.join(tag_list)
+        # article_item["title"] = title
+        # article_item["url"] = response.url
+        
+>>>>>>> master

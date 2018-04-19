@@ -19,6 +19,7 @@ class ArticlespiderItem(scrapy.Item):
     
     pass
 
+<<<<<<< HEAD
 
 # 过滤函数
 def add_jobbole(value):
@@ -85,3 +86,18 @@ class JobBoleArticleItem(scrapy.Item):
         output_processor=Join(',')
     )
     content = scrapy.Field()
+=======
+# class JoBoleArticleItem(scrapy.Item):
+#     title = scrapy.Field()
+#     create_date = scrapy.Field()
+#     url = scrapy.Field()
+#     front_image_url = scrapy.Field()
+#     front_image_path = scrapy.Field()
+#     praise_nums = scrapy.Field()
+#     comment_nums = scrapy.Field()
+#     fav_nums = scrapy.Field()
+#     tags = scrapy.Field()
+#     content = scrapy.Field()
+    
+    
+>>>>>>> master
