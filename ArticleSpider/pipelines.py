@@ -9,9 +9,9 @@ from scrapy.pipelines.images import ImagesPipeline
 import codecs
 import json
 from scrapy.exporters import JsonItemExporter
-import MySQLdb
+import pymysql
 from twisted.enterprise import adbapi
-import MySQLdb.cursors
+import pymysql.cursors
 
 
 class ArticlespiderPipeline(object):
@@ -66,7 +66,7 @@ class ArticleImagePipeline(ImagesPipeline):
 # 爬取的数据一多，插入的速度跟不上爬取的速度，容易引起堵塞
 class MysqlPipeline(object):
     def __init__(self):
-        self.conn = MySQLdb.connect(
+        self.conn = pymysql.connect(
             'localhost',
             'root',
             'root',
@@ -101,10 +101,10 @@ class MysqlTwistedPipeline(object):
             user=settings['MYSQL_USER'],
             passwd=settings['MYSQL_PASSWORD'],
             charset='utf8',
-            cursorclass=MySQLdb.cursors.DictCursor,
+            cursorclass=pymysql.cursors.DictCursor,
             use_unicode=True,
         )
-        dbpool = adbapi.ConnectionPool('MySQLdb', **dbparms)
+        dbpool = adbapi.ConnectionPool('pymysql', **dbparms)
         
         return cls(dbpool)
     
