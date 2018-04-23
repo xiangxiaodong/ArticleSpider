@@ -68,7 +68,7 @@ class JobBoleArticleItem(scrapy.Item):
     url = scrapy.Field()
     url_object_id = scrapy.Field()
     front_image_url = scrapy.Field(
-        output_processor = MapCompose(return_value)
+        output_processor=MapCompose(return_value)
     )
     front_image_path = scrapy.Field()
     praise_nums = scrapy.Field(
@@ -85,3 +85,29 @@ class JobBoleArticleItem(scrapy.Item):
         output_processor=Join(',')
     )
     content = scrapy.Field()
+
+
+class ZhihuQuestionItem(scrapy.Item):
+    zhihu_id = scrapy.Field()
+    topics = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    content = scrapy.Field()
+    answer_num = scrapy.Field()
+    comments_num = scrapy.Field()
+    watch_user_num = scrapy.Field()
+    click_num = scrapy.Field()
+    crawl_time = scrapy.Field()
+
+
+class ZhihuAnswerItem(scrapy.Item):
+    zhihu_id = scrapy.Field()
+    url = scrapy.Field()
+    question_id = scrapy.Field()
+    anthor_id = scrapy.Field()
+    content = scrapy.Field()
+    parise_num = scrapy.Field()
+    comments_num = scrapy.Field()
+    create_time = scrapy.Field()
+    update_time = scrapy.Field()
+    crawl_time = scrapy.Field()
